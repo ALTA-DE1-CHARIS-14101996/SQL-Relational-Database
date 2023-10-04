@@ -3,56 +3,198 @@ RELEASE 1:
 1) Insert
     1.a) Insert 3 product type.
 
+        INSERT INTO product_type (nama_tipe) 
+        VALUES ('Type 1'), ('Type 2'), ('Type 3');
+
     1.b) Insert 2 product dengan product type id = 1
+
+        INSERT INTO product (id_product_type, nama, harga, stok) 
+        VALUES (1, 'Product 1A', 100, 50),
+               (1, 'Product 1B', 150, 30);
 
     1.c) Insert 3 product dengan product type id = 2
 
+        INSERT INTO product (id_product_type, nama, harga, stok) 
+        VALUES  (2, 'Product 2A', 200, 20),
+                (2, 'Product 2B', 250, 40),
+                (2, 'Product 2C', 300, 10);
+
     1.d) Insert 3 product dengan product type id = 3
+
+        INSERT INTO product (id_product_type, nama, harga, stok) 
+        VALUES  (3, 'Product 3A', 300, 15),
+                (3, 'Product 3B', 350, 25),
+                (3, 'Product 3C', 400, 35);
 
     1.e) Insert product description pada setiap product.
 
+        INSERT INTO product_description (deskripsi) 
+        VALUES  ('Description 1A'),
+                ('Description 1B'),
+                ('Description 2A'),
+                ('Description 2B'),
+                ('Description 2C'),
+                ('Description 3A'),
+                ('Description 3B'),
+                ('Description 3C');
+        
     1.f) Insert 3 payment methods.
+
+        INSERT INTO payment_methods (metode_pembayaran) 
+        VALUES  ('Metode 1'),
+                ('Metode 2'),
+                ('Metode 3');
 
     1.g) Insert 5 user pada tabel user.
 
+        INSERT INTO pelanggan (nama, tanggal_lahir, status_user, gender, created_at, updated_at) 
+        VALUES  ('User 1', '1990-01-01', 'Menikah', 'Laki-laki', NOW(), NOW()),
+                ('User 2', '1995-02-15', 'Lajang', 'Perempuan', NOW(), NOW()),
+                ('User 3', '1985-03-20', 'Lajang', 'Laki-laki', NOW(), NOW()),
+                ('User 4', '1993-04-10', 'Menikah', 'Perempuan', NOW(), NOW()),
+                ('User 5', '1997-05-25', 'Lajang', 'Laki-laki', NOW(), NOW());
+
     1.h) Insert 3 transaksi di masing-masing user (min 3 user). (soal berlanjut ke soal 1.j)
 
+        -- Transaksi User 1
+        INSERT INTO transaksi (id_pelanggan, id_payment_method, tanggal, paid_amount, status) 
+        VALUES  (1, 1, NOW(), 300, 'Completed'),
+                (1, 2, NOW(), 200, 'Completed'),
+                (1, 3, NOW(), 150, 'Pending');
+
+        -- Transaksi User 2
+        INSERT INTO transaksi (id_pelanggan, id_payment_method, tanggal, paid_amount, status) 
+        VALUES  (2, 1, NOW(), 250, 'Completed'),
+                (2, 2, NOW(), 180, 'Completed'),
+                (2, 3, NOW(), 210, 'Pending');
+
+        -- Transaksi User 3
+        INSERT INTO transaksi (id_pelanggan, id_payment_method, tanggal, paid_amount, status) 
+        VALUES  (3, 1, NOW(), 400, 'Completed'),
+                (3, 2, NOW(), 300, 'Completed'),
+                (3, 3, NOW(), 250, 'Pending');
+
     1.i) Insert 3 product di masing-masing transaksi.
+
+        -- Untuk Transaksi User 1
+        INSERT INTO detil_transaksi (id_transaksi, id_product, qty, price) 
+        VALUES  (1, 1, 2, 200),
+                (1, 2, 1, 150);
+
+        -- Untuk Transaksi User 2
+        INSERT INTO detil_transaksi (id_transaksi, id_product, qty, price) 
+        VALUES  (4, 3, 3, 750),
+                (5, 4, 2, 500);
+
+        -- Untuk Transaksi User 3
+        INSERT INTO detil_transaksi (id_transaksi, id_product, qty, price)
+        VALUES  (7, 5, 1, 300),
+                (8, 6, 2, 700),
+                (9, 7, 3, 1050);
 
 2) Select
     2.a) Tampilkan nama user / pelanggan dengan gender Laki-laki / M.
 
+        SELECT nama FROM pelanggan
+        WHERE gender IN ('Laki-laki', 'M');
+
     2.b) Tampilkan product dengan id = 3.
+
+        SELECT * FROM product
+        WHERE id = 3;
 
     2.c) Tampilkan data pelanggan yang created_at dalam range 7 hari kebelakang dan mempunyai nama mengandung kata ‘a’.
 
+        SELECT * FROM pelanggan WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+		AND nama LIKE '%a%';
+
     2.d) Hitung jumlah user / pelanggan dengan status gender Perempuan.
+
+        SELECT COUNT(*) FROM pelanggan
+        WHERE gender = 'Perempuan';
 
     2.e) Tampilkan data pelanggan dengan urutan sesuai nama abjad
 
+        SELECT * FROM pelanggan
+        ORDER BY nama;
+
     2.f) Tampilkan 5 data transaksi dengan product id = 3
+
+        SELECT t.* FROM transaksi t
+        JOIN detil_transaksi dt ON t.id = dt.id_transaksi
+        WHERE dt.id_product = 3 LIMIT 5;
 
 3. Update
     3.a) Ubah data product id 1 dengan nama ‘product dummy’.
 
+        UPDATE product
+        SET nama = 'product dummy'
+        WHERE id = 1;
+
     3.b) Update qty = 3 pada transaction detail dengan product id 1.
+
+        UPDATE detil_transaksi
+        SET qty = 3
+        WHERE id_product = 1;
 
 4. Delete
     4.a) Delete data pada tabel product dengan id 1.
+    -- Perlu melakukan 2 step karena terhubung secara FK
+        -- step 1
+        DELETE FROM detil_transaksi WHERE id_product = 1;
+        -- step 2
+        DELETE FROM product WHERE id = 1;
 
     4.b) Delete pada tabel product dengan product-type id 1.
-
+    -- Perlu melakukan 2 step karena terhubung secara FK
+        -- step 1
+        DELETE FROM detil_transaksi WHERE id_product IN (SELECT id FROM product WHERE id_product_type = 1);
+         -- step 2
+        DELETE FROM product WHERE id_product_type = 1; 
 
 RELEASE 2: Join, Union, Sub-query, Function
 
 1. Gabungkan data transaksi dari user id 1 dan user id 2.
 
+    	SELECT * FROM transaksi
+        WHERE id_pelanggan = 1
+        UNION
+        SELECT *
+        FROM transaksi
+        WHERE id_pelanggan = 2;
+
+        --v2
+        SELECT * FROM transaksi
+        WHERE id_pelanggan IN (1, 2);
+
 2. Tampilkan jumlah harga transaksi user id 1.
+
+        SELECT id_pelanggan, SUM(paid_amount) FROM transaksi
+        WHERE id_pelanggan = 1
+        GROUP BY id_pelanggan;
 
 3. Tampilkan total transaksi dengan product type 2.
 
+    SELECT id_product_type, SUM(t.paid_amount) FROM transaksi t
+    JOIN detil_transaksi dt ON t.id = dt.id_transaksi
+    JOIN product p ON dt.id_product = p.id
+    WHERE p.id_product_type = 2
+	GROUP BY id_product_type;
+
 4. Tampilkan semua field table product dan field name table product type yang saling berhubungan.
 
+    SELECT p.*, pt.nama_tipe
+    FROM product p
+    JOIN product_type pt ON p.id_product_type = pt.id;
+
 5. Tampilkan semua field table transaction, field name table product dan field name table user.
+    SELECT t.*, p.nama AS product_name, u.nama AS user_name
+    FROM transaksi t
+    JOIN detil_transaksi dt ON t.id = dt.id_transaksi
+    JOIN product p ON dt.id_product = p.id
+    JOIN pelanggan u ON t.id_pelanggan = u.id;
 
 6. Tampilkan data products yang tidak pernah ada di tabel transaction_details dengan sub-query.
+    SELECT p.*
+    FROM product p
+    WHERE p.id NOT IN (SELECT DISTINCT id_product FROM detil_transaksi);

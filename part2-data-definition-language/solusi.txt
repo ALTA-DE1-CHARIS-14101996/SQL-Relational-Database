@@ -1,34 +1,152 @@
 1) Create database alta_online_shop.
-Sulisi SQL:
+Solusi SQL:
+Open pgAdmin4 --> Klik Kanan pada PostgreSQL 15 --> Pilih Create --> Pilih Database --> Isi nama database dengan alta_online_shop --> Klik Save
+Untuk command SQL CREATE DATABASE alta_online_shop;
 
 2) Dari schema Olshop yang telah kamu kerjakan di, Implementasikanlah menjadi table pada MySQL.
     2.a Create table user
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table pelanggan(
+        id serial,
+        nama text not null,
+        tanggal_lahir date not null,
+        status_user text not null,
+        gender text not null,
+        created_at timestamp not null,
+        updated_at timestamp not null,
+        primary key(id)
+    );
 
     2.b Create table product, product_type, product_description, payment_method.
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table product_type(
+		id serial,
+		nama_tipe text,
+		PRIMARY KEY (id)
+	);
+
+	CREATE table product_description(
+		id serial,
+		deskripsi text,
+		PRIMARY KEY (id)
+	);
+	
+	CREATE table payment_methods(
+		id serial,
+		metode_pembayaran text,
+		PRIMARY KEY (id)
+	);
+	
+	CREATE table merk(          --Tabel ini diperlukan karena menjadi FK tabel product
+		id serial,
+		nama_merk text,
+		PRIMARY KEY (id)
+	);   
+    
+	CREATE table product(
+        id serial,
+        id_product_type int,
+        id_product_description int,
+        id_merk int,
+		nama text,
+        harga int,
+		stok int,
+        PRIMARY KEY (id),
+        FOREIGN KEY (id_product_type) references product_type(id),
+        FOREIGN KEY (id_product_description) references product_description(id),
+        FOREIGN KEY (id_merk) references merk(id)
+    );
 
     3.c Create table transaction, transaction detail.
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table transaksi(
+		id serial,
+		id_pelanggan int,
+		id_payment_method int,
+		tanggal timestamp,
+		paid_amount int,
+		status text,
+		PRIMARY KEY (id),
+		FOREIGN KEY (id_pelanggan) references pelanggan(id),
+		FOREIGN KEY (id_payment_method) references payment_methods(id)
+	);
+
+	CREATE table detil_transaksi(
+		id serial,
+		id_transaksi int,
+		id_product int,
+		qty int,
+		price int,
+		PRIMARY KEY(id),
+		FOREIGN KEY (id_transaksi) references transaksi(id),
+		FOREIGN KEY (id_product) references product(id)
+	);
 
 3) Create table kurir dengan field id, name, created_at, updated_at.
-Sulisi SQL:
+Solusi SQL:
+
+    CREATE table kurir(
+        id serial,
+        name text,
+        created_at timestamp,
+        updated_at timestamp,
+        PRIMARY KEY (id)
+    );
 
 4) Tambahkan ongkos_dasar column di tabel kurir.
-Sulisi SQL:
+Solusi SQL:
+
+    ALTER table kurir ADD COLUMN ongkos_dasar int;
 
 5) Rename tabel kurir menjadi shipping.
-Sulisi SQL:
+Solusi SQL:
+
+    ALTER table kurir RENAME TO shipping; 
 
 6) Hapus / Drop tabel shipping karena ternyata tidak dibutuhkan.
-Sulisi SQL:
+Solusi SQL:
+
+    DROP table shipping;
 
 7) Silahkan menambahkan entity baru dengan relation 1-to-1, 1-to-many, many-to-many. Seperti:
     7.a) 1-to-1: payment_method dengan description.
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table payment_method_description (
+        payment_method_id int,
+        description text NOT NULL,
+        PRIMARY KEY(payment_method_id),
+        FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id)
+    );
 
     7.b) 1-to-many: user dengan alamat.
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table alamat (
+        id serial ,
+        id_pelanggan int NOT NULL,
+        street_address text NOT NULL,
+        city text NOT NULL,
+        postal_code int NOT NULL,
+        created_at timestamp NOT NULL,
+        updated_at timestamp NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id)
+    );
 
     7.c) many-to-many: user dengan payment_method menjadi user_payment_method_detail.
-    Sulisi SQL:
+    Solusi SQL:
+
+    CREATE table user_payment_method_detail (
+		id serial,
+		id_pelanggan int NOT NULL,
+		id_payment_method int NOT NULL,
+		created_at timestamp NOT NULL,
+		updated_at timestamp NOT NULL,
+		PRIMARY KEY (id),
+		FOREIGN KEY (id_pelanggan) REFERENCES pelanggan(id),
+		FOREIGN KEY (id_payment_method) REFERENCES payment_methods(id)
+	);
